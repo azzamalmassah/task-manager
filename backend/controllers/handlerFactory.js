@@ -31,17 +31,18 @@ export const getAll = (Model) =>
   catchAsync(async (req, res, next) => {
     let filter = {};
 
-    if (req.user.role === "product-manager") {
-      filter = { createdBy: req.user.id };
-    }
+    // if (req.user.role === "product-manager") {
+    //   filter = { createdBy: req.user.id };
+    // }
 
-    if (req.user.role === "user") {
-      filter = { assignedTo: req.user.id };
-    }
+    // if (req.user.role === "user") {
+    //   filter = { assignedTo: req.user.id };
+    // }
     const docs = await Model.find(filter);
 
     res.status(200).json({
       status: "success",
+      result: docs.length,
       data: {
         data: docs,
       },
@@ -58,5 +59,22 @@ export const deleteOne = (Model) =>
     res.status(200).json({
       status: "success",
       data: null,
+    });
+  });
+
+export const updateOne = (Model) =>
+  catchAsync(async (req, res, next) => {
+    const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+    if (!doc) {
+      return next(new AppError("No Document found with this ID", 404));
+    }
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: doc,
+      },
     });
   });
