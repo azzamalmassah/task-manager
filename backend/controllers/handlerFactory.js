@@ -1,5 +1,6 @@
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import { APIFeatures } from "../utils/apiFeatures.js";
 export const createOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.create(req.body);
@@ -38,7 +39,15 @@ export const getAll = (Model) =>
     // if (req.user.role === "user") {
     //   filter = { assignedTo: req.user.id };
     // }
-    const docs = await Model.find(filter);
+    const defaults = res.locals.aliasQuery || {};
+    const effectiveQuery = { ...defaults, ...(req.query || {}) };
+    //EXECUTE QUERY
+    const features = new APIFeatures(Model.find(), effectiveQuery)
+      .filter()
+      .sorting()
+      .limiting()
+      .paginate();
+    const docs = await features.query;
 
     res.status(200).json({
       status: "success",
