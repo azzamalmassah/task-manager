@@ -47,14 +47,32 @@ const userSchema = new mongoose.Schema(
   },
 );
 // hash the password
-// userSchema.pre("save", async function (next) {
-//   if (!this.isModified("password")) {
-//     return next();
-//   }
-//   this.password = await bcrypt.hash(this.password, 12);
-//   this.passwordConfirm = undefined;
-//   next();
-// });
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) {
+    return next();
+  }
+  this.password = await bcrypt.hash(this.password, 12);
+  this.passwordConfirm = undefined;
+});
+
+userSchema.methods.correctPassword = async function (
+  loginPassword,
+  userPassword,
+) {
+  return await bcrypt.compare(loginPassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (jwtTimeStamp) {
+  if (this.passwordChangedAt) {
+    const changedTimeStamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+    return jwtTimeStamp < changedTimeStamp;
+  }
+
+  return false;
+};
 const User = mongoose.model("User", userSchema);
 
 export default User;

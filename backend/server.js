@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
+dotenv.config({ path: "./.env", override: true });
+
 import app from "./app.js";
 import mongoose from "mongoose";
-
-dotenv.config({ path: "./.env", override: true });
 
 //connect DB
 
