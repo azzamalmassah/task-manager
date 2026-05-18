@@ -6,9 +6,18 @@ import {
   deleteTask,
   updateTask,
 } from "../controllers/tasksController.js";
+import { protect, restrictTo } from "../controllers/authController.js";
 const router = express.Router();
 
-router.route("/").post(createTask).get(getAllTasks);
-router.route("/:id").get(getTask).delete(deleteTask).patch(updateTask);
+router.use(protect);
+router
+  .route("/")
+  .post(restrictTo("admin", "department-manager"), createTask)
+  .get(restrictTo("admin", "department-manager"), getAllTasks);
+router
+  .route("/:id")
+  .get(restrictTo("admin", "department-manager", "user"), getTask)
+  .delete(restrictTo("admin"), deleteTask)
+  .patch(restrictTo("admin", "department-manager"), updateTask);
 
 export default router;

@@ -36,7 +36,7 @@ export const GetAllFilter = (Model, user) => {
   // to get tasks of a specific project or to get all tasks, if the user is admin or product manager,
   //  he can only see the tasks he created, if the user is employee, he can only see the tasks assigned to him
   if (Model.modelName === "Task") {
-    if (user.role === "product-manager" || user.role === "admin") {
+    if (user.role === "department-manager" || user.role === "admin") {
       filter = { createdBy: user.id };
     } else if (user.role === "user" || user.role === "employee") {
       filter = { assignedTo: user.id };
