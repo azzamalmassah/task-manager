@@ -28,21 +28,50 @@ export const getOne = (Model) =>
     });
   });
 
+// Helper to compute role- and model-aware filters for `getAll`
+export const GetAllFilter = (Model, user) => {
+  let filter = {};
+
+  if (!user) return filter;
+  // to get tasks of a specific project or to get all tasks, if the user is admin or product manager,
+  //  he can only see the tasks he created, if the user is employee, he can only see the tasks assigned to him
+  if (Model.modelName === "Task") {
+    if (user.role === "product-manager" || user.role === "admin") {
+      filter = { createdBy: user.id };
+    } else if (user.role === "user" || user.role === "employee") {
+      filter = { assignedTo: user.id };
+    }
+    // to get all users, if the user is department manager, he can only see the users of his department,
+    //  if the user is admin, he can see all users
+  } else if (Model.modelName === "User") {
+    if (user.role === "department-manager") {
+      filter = { department: user.department };
+    } else if (user.role === "admin") {
+      filter = {};
+    } else {
+      filter = { _id: user.id };
+    }
+  } else {
+    // for other models, if the user is admin or department manager,
+    //  he can see all items, if the user is employee or user, he can only see the items created by him
+    if (user.role === "product-manager" || user.role === "admin") {
+      filter = { createdBy: user.id };
+    } else if (user.role === "user") {
+      filter = { assignedTo: user.id };
+    }
+  }
+
+  return filter;
+};
+
 export const getAll = (Model) =>
   catchAsync(async (req, res, next) => {
-    let filter = {};
-
-    // if (req.user.role === "product-manager") {
-    //   filter = { createdBy: req.user.id };
-    // }
-
-    // if (req.user.role === "user") {
-    //   filter = { assignedTo: req.user.id };
-    // }
+    // compute filter using helper
+    let filter = GetAllFilter(Model, req.user);
     const defaults = res.locals.aliasQuery || {};
     const effectiveQuery = { ...defaults, ...(req.query || {}) };
-    //EXECUTE QUERY
-    const features = new APIFeatures(Model.find(), effectiveQuery)
+    // EXECUTE QUERY (apply the computed filter to the base query)
+    const features = new APIFeatures(Model.find(filter), effectiveQuery)
       .filter()
       .sorting()
       .limiting()
