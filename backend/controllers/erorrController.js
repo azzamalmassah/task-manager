@@ -81,7 +81,7 @@ const sendErrorProd = (err, req, res) => {
 export default (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV !== "production") {
     sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === "production") {
     // let error = Object.create(err);

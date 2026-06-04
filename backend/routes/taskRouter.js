@@ -18,6 +18,9 @@ router
   .route("/:id")
   .get(restrictTo("admin", "department-manager", "user"), getTask)
   .delete(restrictTo("admin"), deleteTask)
-  .patch(restrictTo("admin", "department-manager"), updateTask);
+  .patch(
+    restrictTo("admin", "department-manager", "user", "employee"),
+    updateTask,
+  );
 
 export default router;

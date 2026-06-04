@@ -1,0 +1,6 @@
+{
+  "name": "Task Orchestrator",
+  "description": "Professional-grade task management platform for high-stakes orchestration and productivity.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
